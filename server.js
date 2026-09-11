@@ -5,45 +5,66 @@ const app = express();
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const STATE_KEY = 'wird:state';
 const PORT = process.env.PORT || 3000;
-const REDIS_URL = process.env.REDIS_URL || process.env.RENDER_KEY_VALUE_URL || '';
+const DATABASE_URL = process.env.DATABASE_URL || '';
 
-// ---- storage: Redis-compatible key-value store, with an in-memory
-// fallback so the app still runs (non-persistently) if no store is
+// ---- storage: Postgres (Render's managed instance), with an in-memory
+// fallback so the app still runs (non-persistently) if no database is
 // configured yet, e.g. during local development. ----
-let redisClient = null;
-let memoryFallback = null; // string | null
+let pool = null;
+let ready = null; // promise that resolves once the table exists
+let memoryFallback = null; // object | null
+let memoryFallbackWarned = false;
 
-async function getStore() {
-  if (!REDIS_URL) {
+function getPool() {
+  if (!DATABASE_URL) return null;
+  if (!pool) {
+    const { Pool } = require('pg');
+    pool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+  }
+  return pool;
+}
+
+async function ensureReady() {
+  const p = getPool();
+  if (!p) {
     if (!memoryFallbackWarned) {
-      console.warn('[wird] REDIS_URL not set — using a non-persistent in-memory store.');
+      console.warn('[wird] DATABASE_URL not set — using a non-persistent in-memory store.');
       memoryFallbackWarned = true;
     }
     return null;
   }
-  if (redisClient) return redisClient;
-  const { createClient } = require('redis');
-  redisClient = createClient({ url: REDIS_URL });
-  redisClient.on('error', (err) => console.error('[wird] redis error', err));
-  await redisClient.connect();
-  return redisClient;
+  if (!ready) {
+    ready = p.query(
+      `CREATE TABLE IF NOT EXISTS wird_state (
+         id INT PRIMARY KEY DEFAULT 1,
+         data JSONB NOT NULL,
+         CONSTRAINT single_row CHECK (id = 1)
+       )`
+    );
+  }
+  await ready;
+  return p;
 }
-let memoryFallbackWarned = false;
 
 async function readState() {
-  const client = await getStore();
-  if (!client) return memoryFallback ? JSON.parse(memoryFallback) : null;
-  const raw = await client.get(STATE_KEY);
-  return raw ? JSON.parse(raw) : null;
+  const p = await ensureReady();
+  if (!p) return memoryFallback;
+  const { rows } = await p.query('SELECT data FROM wird_state WHERE id = 1');
+  return rows.length ? rows[0].data : null;
 }
 
 async function writeState(state) {
-  const json = JSON.stringify(state);
-  const client = await getStore();
-  if (!client) { memoryFallback = json; return; }
-  await client.set(STATE_KEY, json);
+  const p = await ensureReady();
+  if (!p) { memoryFallback = state; return; }
+  await p.query(
+    `INSERT INTO wird_state (id, data) VALUES (1, $1)
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data`,
+    [state]
+  );
 }
 
 // ---- API ----
