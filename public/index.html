@@ -97,6 +97,16 @@
   .minimum .task{font-family:'Amiri',serif; font-size:21px; font-weight:700; color:#fbf6f9; margin-top:4px;}
   .minimum .sub{font-family:'Cairo',sans-serif; font-size:12.5px; color:rgba(255,255,255,0.6); margin-top:5px;}
 
+  /* ---------- view tabs ---------- */
+  .view-tabs{display:flex; gap:8px; margin-bottom:18px;}
+  .view-tab{
+    flex:1; text-align:center; padding:11px; border:1px solid var(--line); border-radius:var(--radius);
+    background:var(--card); cursor:pointer; font-family:'Cairo',sans-serif; font-weight:600; font-size:14px; color:var(--dusk);
+    transition: background .12s ease, color .12s ease;
+  }
+  .view-tab:hover{color:var(--navy-900);}
+  .view-tab.active{background:var(--navy-900); color:#fdfbf3; border-color:var(--navy-900);}
+
   /* ---------- board ---------- */
   .board{display:grid; grid-template-columns:1fr 74px 1fr; gap:6px; align-items:start;}
   @media (max-width:680px){ .board{grid-template-columns:1fr;} .lock-col{order:2; margin:6px 0;} }
@@ -186,6 +196,33 @@
   .panel-list li .del-btn{border:none;background:none;color:#b45;cursor:pointer;font-size:16px;padding:0 4px;}
   .empty-tasks{font-size:13px; color:var(--dusk); padding:8px 0;}
 
+  /* ---------- goals ---------- */
+  .goal-list{list-style:none; margin:0; padding:10px 8px;}
+  .goal-item{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 10px; border-radius:3px;}
+  .goal-item:hover{background:rgba(198,93,132,0.06);}
+  .goal-main{flex:1; min-width:0;}
+  .goal-text{font-size:14.5px; color:var(--ink);}
+  .goal-dates{font-size:11.5px; color:var(--dusk); margin-top:3px;}
+  .goal-actions{display:flex; gap:4px; flex-shrink:0;}
+  .goal-done, .goal-cancel{
+    border:1px solid var(--line); background:#fff; width:26px; height:26px; border-radius:3px;
+    cursor:pointer; font-size:13px; line-height:1; display:flex; align-items:center; justify-content:center;
+  }
+  .goal-done{color:var(--navy-700);}
+  .goal-done:hover{background:var(--rose-soft);}
+  .goal-cancel{color:#b45;}
+  .goal-cancel:hover{background:var(--rose-soft);}
+  .goal-hist-toggle{
+    width:100%; text-align:center; margin-top:4px; background:none; cursor:pointer;
+    color:var(--dusk); font-family:'Cairo',sans-serif; font-size:12px; padding:8px 0 6px;
+    border:none; border-top:1px dashed var(--line);
+  }
+  .goal-hist-toggle:hover{color:var(--navy-900);}
+  .goal-hist-list{display:none; list-style:none; margin:0; padding:0 8px 10px;}
+  .goal-hist-list.open{display:block;}
+  .goal-hist-item{padding:8px 2px; border-bottom:1px solid var(--line);}
+  .goal-hist-item .goal-text.cancelled{color:var(--dusk); text-decoration:line-through;}
+
   /* ---------- history ---------- */
   .hist-entry{border-bottom:1px solid var(--line);}
   .hist-entry:last-child{border-bottom:none;}
@@ -249,11 +286,13 @@ const UAE_TZ = 'Asia/Dubai';
 const MAX_DAYS_KEPT = 365;
 const POLL_MS = 8000;
 
-let STATE = null;        // {names:{me,her}, tasks:[{id,label}], days:{ "<date>": {...} }}
+let STATE = null;        // {names:{me,her}, tasks:[{id,label}], days:{ "<date>": {...} }, goals:{me:[],her:[]}}
 let today = null;
 let dayState = null;
 let saving = false;
 let saveError = false;
+let view = 'daily';      // 'daily' | 'goals'
+let goalHistOpen = { me:false, her:false };
 
 const $app = document.getElementById('app');
 const AR_DIGITS = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
@@ -317,10 +356,17 @@ async function boot(){
     return;
   }
   if(!STATE){ renderSetup(); return; }
+  ensureGoals();
   loadDay();
   render();
   scheduleMidnightRefresh();
   schedulePolling();
+}
+
+function ensureGoals(){
+  if(!STATE.goals) STATE.goals = {me:[], her:[]};
+  if(!Array.isArray(STATE.goals.me)) STATE.goals.me = [];
+  if(!Array.isArray(STATE.goals.her)) STATE.goals.her = [];
 }
 
 function scheduleMidnightRefresh(){
@@ -343,6 +389,7 @@ function schedulePolling(){
       const fresh = await fetchState();
       if(fresh && JSON.stringify(fresh) !== JSON.stringify(STATE)){
         STATE = fresh;
+        ensureGoals();
         loadDay();
         render();
       }
@@ -419,7 +466,8 @@ function renderSetup(){
     const newState = {
       names:{me, her},
       tasks: DEFAULT_TASKS.map(t => ({id:uid(), label:t})),
-      days:{}
+      days:{},
+      goals:{me:[], her:[]}
     };
     try{
       await saveStateToServer(newState);
@@ -497,25 +545,102 @@ function renderColumn(personKey, personName){
   `;
 }
 
+/* ---------------- goals ---------------- */
+function addGoal(personKey, text){
+  mutate(()=>{
+    ensureGoals();
+    STATE.goals[personKey].push({id:uid(), text, start: todayKey(), status:'active', end:null});
+  });
+}
+function completeGoal(personKey, id){
+  mutate(()=>{
+    ensureGoals();
+    const g = STATE.goals[personKey].find(g=>g.id===id);
+    if(g){ g.status='completed'; g.end = todayKey(); }
+  });
+}
+function cancelGoal(personKey, id){
+  mutate(()=>{
+    ensureGoals();
+    const g = STATE.goals[personKey].find(g=>g.id===id);
+    if(g){ g.status='cancelled'; g.end = todayKey(); }
+  });
+}
+
+function renderGoalsColumn(personKey, personName){
+  ensureGoals();
+  const list = STATE.goals[personKey];
+  const active = list.filter(g=>g.status==='active');
+  const past = list.filter(g=>g.status!=='active').sort((a,b)=> (b.end||'').localeCompare(a.end||''));
+
+  const activeHtml = active.length ? active.map(g=>`
+    <li class="goal-item">
+      <div class="goal-main">
+        <div class="goal-text">${escapeHtml(g.text)}</div>
+        <div class="goal-dates">بدأ: ${arDate(g.start)}</div>
+      </div>
+      <div class="goal-actions">
+        <button class="goal-done" data-complete="${g.id}" data-person="${personKey}" aria-label="تحقيق الهدف">✓</button>
+        <button class="goal-cancel" data-cancel="${g.id}" data-person="${personKey}" aria-label="إلغاء الهدف">×</button>
+      </div>
+    </li>`).join('') : '<li class="empty-tasks">لا توجد أهداف نشطة، أضيفا واحدًا أدناه</li>';
+
+  const pastHtml = past.length ? past.map(g=>`
+    <li class="goal-hist-item">
+      <div class="goal-text ${g.status==='cancelled'?'cancelled':''}">${g.status==='completed'?'✓ ':'✕ '}${escapeHtml(g.text)}</div>
+      <div class="goal-dates">${arDate(g.start)} ← ${g.end?arDate(g.end):''}</div>
+    </li>`).join('') : '<li class="empty-tasks">لا يوجد سجل بعد</li>';
+
+  return `
+    <div class="col col-${personKey}">
+      <div class="col-head">
+        <h2>${escapeHtml(personName)}</h2>
+      </div>
+      <ul class="goal-list">${activeHtml}</ul>
+      <div class="add-row">
+        <input type="text" placeholder="هدف جديد…" data-goalinput="${personKey}" id="goalInput-${personKey}">
+        <button data-goaladdbtn="${personKey}">إضافة</button>
+      </div>
+      <button class="goal-hist-toggle" data-histtoggle="${personKey}">${goalHistOpen[personKey] ? 'إخفاء سجل الأهداف السابقة' : 'سجل الأهداف السابقة'}</button>
+      <ul class="goal-hist-list ${goalHistOpen[personKey]?'open':''}" id="goalHist-${personKey}">${pastHtml}</ul>
+    </div>
+  `;
+}
+
+function attachGoalsEvents(){
+  $app.querySelectorAll('[data-complete]').forEach(b=>{
+    b.addEventListener('click', ()=> completeGoal(b.dataset.person, b.dataset.complete));
+  });
+  $app.querySelectorAll('[data-cancel]').forEach(b=>{
+    b.addEventListener('click', ()=> cancelGoal(b.dataset.person, b.dataset.cancel));
+  });
+  $app.querySelectorAll('[data-goaladdbtn]').forEach(btn=>{
+    const pk = btn.dataset.goaladdbtn;
+    const input = $app.querySelector(`[data-goalinput="${pk}"]`);
+    const submit = ()=>{
+      const val = input.value.trim();
+      if(!val) return;
+      addGoal(pk, val);
+    };
+    btn.addEventListener('click', submit);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  });
+  $app.querySelectorAll('[data-histtoggle]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const pk = b.dataset.histtoggle;
+      goalHistOpen[pk] = !goalHistOpen[pk];
+      render();
+    });
+  });
+}
+
 function minimumTask(){
   if(dayState.minimumId==null) return null;
   return STATE.tasks.find(t=>t.id===dayState.minimumId) || STATE.tasks[0] || null;
 }
 
-function render(){
-  const min = minimumTask();
-  const names = STATE.names;
-  $app.className = 'wrap';
-  $app.innerHTML = `
-    <div class="hadith">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div>
-    <div class="top">
-      <div class="brand">الورد اليومي<small>${escapeHtml(names.me)} و${escapeHtml(names.her)}</small></div>
-      <div class="top-right">
-        <div class="date">${friendlyDate()}</div>
-        ${saveError ? '<span class="err-badge">تعذر الحفظ، أعيدا المحاولة</span>' : (saving ? '<span class="save-badge">جارٍ الحفظ…</span>' : '')}
-      </div>
-    </div>
-
+function renderDailySection(min, names){
+  return `
     ${min ? `
     <div class="minimum">
       <div class="label">الحد الأدنى لهذا اليوم — اختير لكما معًا</div>
@@ -553,10 +678,60 @@ function render(){
       </div>
     </div>
   `;
-  attachEvents();
 }
 
-function attachEvents(){
+function renderGoalsSection(names){
+  return `
+    <div class="minimum">
+      <div class="label">حافزكما لتحقيق الأهداف</div>
+      <div class="task">«إنَّ اللهَ تعالى يُحِبُّ إذا عمِلَ أحدُكمْ عملًا أنْ يُتقِنَهُ»</div>
+      <div class="sub">تعلّما، تطوّرا، وأحسنا في كل ما تسعيان إليه</div>
+    </div>
+
+    <div class="board">
+      ${renderGoalsColumn('me', names.me)}
+      <div class="lock-col">${heartInfinitySvg()}</div>
+      ${renderGoalsColumn('her', names.her)}
+    </div>
+  `;
+}
+
+function render(){
+  const min = minimumTask();
+  const names = STATE.names;
+  $app.className = 'wrap';
+  $app.innerHTML = `
+    <div class="hadith">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div>
+    <div class="top">
+      <div class="brand">الورد اليومي<small>${escapeHtml(names.me)} و${escapeHtml(names.her)}</small></div>
+      <div class="top-right">
+        <div class="date">${friendlyDate()}</div>
+        ${saveError ? '<span class="err-badge">تعذر الحفظ، أعيدا المحاولة</span>' : (saving ? '<span class="save-badge">جارٍ الحفظ…</span>' : '')}
+      </div>
+    </div>
+
+    <div class="view-tabs">
+      <button class="view-tab ${view==='daily'?'active':''}" data-view="daily">الورد اليومي</button>
+      <button class="view-tab ${view==='goals'?'active':''}" data-view="goals">الأهداف</button>
+    </div>
+
+    ${view==='daily' ? renderDailySection(min, names) : renderGoalsSection(names)}
+  `;
+  attachViewTabs();
+  if(view==='daily'){ attachDailyEvents(); } else { attachGoalsEvents(); }
+}
+
+function attachViewTabs(){
+  $app.querySelectorAll('[data-view]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(view === btn.dataset.view) return;
+      view = btn.dataset.view;
+      render();
+    });
+  });
+}
+
+function attachDailyEvents(){
   $app.querySelectorAll('ul.tasks li').forEach(li=>{
     const toggle = ()=>{
       const person = li.dataset.person;
