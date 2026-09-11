@@ -61,6 +61,10 @@
   }
   .brand{font-family:'Amiri', serif; font-weight:700; font-size:30px; color:var(--navy-900); letter-spacing:0.2px;}
   .brand small{display:block; font-family:'Cairo',sans-serif; font-size:13px; font-weight:400; color:var(--dusk); letter-spacing:0.2px; margin-top:4px;}
+  .hadith{
+    font-family:'Amiri', serif; font-size:20px; font-weight:700; color:#000;
+    text-align:center; margin-top:40px; padding-bottom:14px; letter-spacing:0.2px;
+  }
   .top-right{display:flex; flex-direction:column; align-items:flex-start; gap:6px;}
   .date{font-family:'Cairo',sans-serif; font-size:13.5px; color:var(--navy-700);}
   .save-badge{
@@ -107,8 +111,8 @@
   .col-head h2{margin:0; font-family:'Amiri',serif; font-size:21px; font-weight:700; color:var(--navy-900);}
   .progress-txt{font-family:'Cairo',sans-serif; font-size:11.5px; color:var(--dusk); font-variant-numeric:tabular-nums;}
 
-  .lock-col{display:flex; align-items:center; justify-content:center; padding-top:40px;}
-  .lock-col svg{width:50px; height:50px;}
+  .lock-col{display:flex; align-items:center; justify-content:center; padding-top:14px;}
+  .lock-col svg{width:64px; height:64px;}
 
   ul.tasks{list-style:none; margin:0; padding:10px 8px;}
   ul.tasks li{
@@ -503,6 +507,7 @@ function render(){
   const names = STATE.names;
   $app.className = 'wrap';
   $app.innerHTML = `
+    <div class="hadith">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div>
     <div class="top">
       <div class="brand">الورد اليومي<small>${escapeHtml(names.me)} و${escapeHtml(names.her)}</small></div>
       <div class="top-right">
@@ -526,7 +531,7 @@ function render(){
 
     <div class="foot">
       <div class="streak" id="streakBox">${'<b>' + arabicDayWord(computeStreak()) + '</b> حققتما فيها الحد الأدنى معًا'}</div>
-      <div style="display:flex; gap:8px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <button class="manage-btn" id="historyBtn">الأيام السابقة</button>
         <button class="manage-btn" id="manageBtn">إدارة القائمة المشتركة</button>
       </div>
