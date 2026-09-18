@@ -1,0 +1,12 @@
+{
+  "name": "الورد اليومي",
+  "short_name": "الورد اليومي",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#e9eefb",
+  "theme_color": "#16264a",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
