@@ -317,9 +317,16 @@ const AR_DIGITS = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
 function toAr(n){ return String(n).replace(/[0-9]/g, d => AR_DIGITS[d]); }
 function uid(){ return Math.random().toString(36).slice(2,9); }
 
+// The "wird day" rolls over at 3am Dubai time, not midnight — shift the
+// instant back 3 hours before reading the Dubai calendar date so 00:00–02:59
+// still counts as the previous day.
+const DAY_ROLLOVER_HOUR = 3;
+function rolledNow(){
+  return new Date(Date.now() - DAY_ROLLOVER_HOUR*60*60*1000);
+}
 function todayKey(){
   const fmt = new Intl.DateTimeFormat('en-CA', {timeZone: UAE_TZ, year:'numeric', month:'2-digit', day:'2-digit'});
-  return fmt.format(new Date());
+  return fmt.format(rolledNow());
 }
 function shiftDateKey(dateKey, deltaDays){
   const [y,m,d] = dateKey.split('-').map(Number);
@@ -328,7 +335,7 @@ function shiftDateKey(dateKey, deltaDays){
   return dt.toISOString().slice(0,10);
 }
 function friendlyDate(){
-  return new Date().toLocaleDateString('ar', {timeZone: UAE_TZ, weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  return rolledNow().toLocaleDateString('ar', {timeZone: UAE_TZ, weekday:'long', year:'numeric', month:'long', day:'numeric'});
 }
 function seededPick(seedStr, n){
   let h = 0;
