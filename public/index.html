@@ -259,6 +259,94 @@
     .hist-body{grid-template-columns:1fr; gap:16px;}
   }
 
+  /* ---------- calendar ---------- */
+  .cal-toggle{display:flex; gap:8px; margin-bottom:16px;}
+  .cal-toggle-btn{
+    flex:1; text-align:center; padding:8px; border:1px solid var(--line); border-radius:3px;
+    background:var(--card); cursor:pointer; font-family:'Cairo',sans-serif; font-weight:600; font-size:13px; color:var(--dusk);
+  }
+  .cal-toggle-btn:hover{color:var(--navy-900);}
+  .cal-toggle-btn.active{background:var(--navy-700); color:#fdfbf3; border-color:var(--navy-700);}
+
+  .cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-navbtn{
+    border:1px solid var(--line); background:var(--card); width:32px; height:32px; border-radius:3px;
+    cursor:pointer; font-size:16px; color:var(--navy-700); line-height:1;
+  }
+  .cal-navbtn:hover{background:var(--rose-soft);}
+  .cal-monthlabel{font-family:'Amiri',serif; font-size:18px; font-weight:700; color:var(--navy-900);}
+
+  .cal-grid{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-bottom:16px;}
+  .cal-weekdays{display:grid; grid-template-columns:repeat(7,1fr); border-bottom:1px solid var(--line);}
+  .cal-weekday{padding:8px 2px; text-align:center; font-family:'Cairo',sans-serif; font-size:11px; font-weight:700; color:var(--dusk);}
+  .cal-days{display:grid; grid-template-columns:repeat(7,1fr);}
+  .cal-cell{
+    min-height:64px; border:none; border-bottom:1px solid var(--line); border-inline-start:1px solid var(--line);
+    background:#fff; text-align:right; padding:5px; cursor:pointer; display:flex; flex-direction:column; gap:3px;
+    font-family:'Cairo',sans-serif;
+  }
+  .cal-cell:hover{background:rgba(198,93,132,0.06);}
+  .cal-cell.is-today .cal-daynum{color:var(--rose-dark); font-weight:700;}
+  .cal-cell.is-selected{background:rgba(198,93,132,0.12);}
+  .cal-cell-pad{background:transparent; border:none; cursor:default;}
+  .cal-daynum{font-size:12px; color:var(--navy-700); font-variant-numeric:tabular-nums;}
+  .cal-events{display:flex; flex-direction:column; gap:2px;}
+  .cal-pill{
+    font-size:9.5px; padding:1px 4px; border-radius:2px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .cal-pill-me{background:var(--navy-700);}
+  .cal-pill-her{background:var(--rose);}
+  .cal-pill-shared{background:var(--dusk);}
+  .cal-more{font-size:9.5px; color:var(--dusk);}
+  @media (max-width:680px){
+    .cal-cell{min-height:44px; padding:4px;}
+    .cal-pill{display:none;}
+    .cal-events{align-items:flex-end;}
+    .cal-cell.has-events .cal-events::after{
+      content:""; width:5px; height:5px; border-radius:50%; background:var(--rose); display:inline-block;
+    }
+  }
+
+  .cal-day-detail{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px;}
+  .cal-day-detail h3{margin:0 0 8px; font-family:'Amiri',serif; font-size:16px; color:var(--navy-900);}
+  .cal-event-list{list-style:none; margin:0 0 8px; padding:0;}
+  .cal-event-item{display:flex; align-items:flex-start; gap:8px; padding:8px 8px; border-bottom:1px solid var(--line); border-inline-start:3px solid transparent;}
+  .cal-event-item:last-child{border-bottom:none;}
+  .cal-event-item.cal-event-me{border-inline-start-color:var(--navy-700);}
+  .cal-event-item.cal-event-her{border-inline-start-color:var(--rose);}
+  .cal-event-item.cal-event-shared{border-inline-start-color:var(--dusk);}
+  .cal-event-main{flex:1; min-width:0;}
+  .cal-event-title{font-size:14px; color:var(--ink);}
+  .cal-event-note{font-size:12px; color:var(--dusk); margin-top:2px;}
+  .cal-event-who{font-size:11px; color:var(--navy-700); margin-top:3px; font-weight:600;}
+  .cal-event-item.cal-event-her .cal-event-who{color:var(--rose-dark);}
+  .cal-event-item.cal-event-shared .cal-event-who{color:var(--dusk);}
+  .cal-del{border:none; background:none; color:#b45; font-size:16px; cursor:pointer; padding:0 4px; flex-shrink:0;}
+  .cal-del:hover{opacity:0.7;}
+
+  .cal-add-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; margin-top:6px;}
+  .cal-add-card .cal-add-row{border-top:none;}
+  .cal-add-row{flex-wrap:wrap;}
+  .cal-add-row input[type="text"]{flex:1 1 130px; min-width:110px;}
+  .cal-add-row input[type="date"]{flex:0 0 128px;}
+  .cal-add-row select{
+    flex:0 0 104px; border:1px solid var(--line); border-radius:3px; padding:9px 6px;
+    font-family:'Cairo',sans-serif; font-size:13px; background:#fff; color:var(--ink);
+  }
+  .cal-add-row select:focus{outline:2px solid var(--navy-500); outline-offset:1px;}
+
+  .cal-list{list-style:none; margin:0 0 16px; padding:0; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+  .cal-list-item{display:flex; align-items:flex-start; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); border-inline-start:3px solid transparent;}
+  .cal-list-item:last-child{border-bottom:none;}
+  .cal-list-item:hover{background:rgba(198,93,132,0.06);}
+  .cal-list-item.cal-event-me{border-inline-start-color:var(--navy-700);}
+  .cal-list-item.cal-event-her{border-inline-start-color:var(--rose);}
+  .cal-list-item.cal-event-shared{border-inline-start-color:var(--dusk);}
+  .cal-list-item.cal-event-her .cal-event-who{color:var(--rose-dark);}
+  .cal-list-item.cal-event-shared .cal-event-who{color:var(--dusk);}
+  .cal-list-date{flex-shrink:0; width:82px; font-size:11.5px; color:var(--navy-700); font-weight:700; padding-top:2px;}
+  .cal-list-item.cal-past{opacity:0.5;}
+
   /* ---------- setup screen ---------- */
   .setup{max-width:460px; margin:60px auto; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:30px 28px; position:relative;}
   .setup h1{font-family:'Amiri',serif; font-size:25px; margin:0 0 6px; color:var(--navy-900); text-wrap:balance;}
@@ -304,13 +392,16 @@ const UAE_TZ = 'Asia/Dubai';
 const MAX_DAYS_KEPT = 365;
 const POLL_MS = 8000;
 
-let STATE = null;        // {names:{me,her}, tasks:[{id,label}], days:{ "<date>": {...} }, goals:{me:[],her:[]}}
+let STATE = null;        // {names:{me,her}, tasks:[{id,label}], days:{ "<date>": {...} }, goals:{me:[],her:[]}, events:[{id,date,title,note,person:'me'|'her'|null,repeat:null|'weekly'|'biweekly'}]}
 let today = null;
 let dayState = null;
 let saving = false;
 let saveError = false;
-let view = 'daily';      // 'daily' | 'goals'
+let view = 'daily';      // 'daily' | 'goals' | 'calendar'
 let goalHistOpen = { me:false, her:false };
+let calView = 'grid';    // 'grid' | 'list'
+let calMonth = null;     // 'YYYY-MM' currently shown in grid view
+let calSelectedDate = null; // date key whose events show below the grid
 
 const $app = document.getElementById('app');
 const AR_DIGITS = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
@@ -334,9 +425,49 @@ function shiftDateKey(dateKey, deltaDays){
   dt.setUTCDate(dt.getUTCDate()+deltaDays);
   return dt.toISOString().slice(0,10);
 }
+function daysBetween(aKey, bKey){
+  const [ay,am,ad] = aKey.split('-').map(Number);
+  const [by,bm,bd] = bKey.split('-').map(Number);
+  const a = Date.UTC(ay, am-1, ad);
+  const b = Date.UTC(by, bm-1, bd);
+  return Math.round((b-a) / 86400000);
+}
 function friendlyDate(){
   return rolledNow().toLocaleDateString('ar', {timeZone: UAE_TZ, weekday:'long', year:'numeric', month:'long', day:'numeric'});
 }
+
+/* ---------------- calendar date helpers ---------------- */
+const WEEKDAYS_AR = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function shiftMonth(ym, delta){
+  const [y,m] = ym.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m-1+delta, 1, 12));
+  return dt.toISOString().slice(0,7);
+}
+function monthLabel(ym){
+  const [y,m] = ym.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m-1, 1, 12));
+  return dt.toLocaleDateString('ar', {timeZone:'UTC', month:'long', year:'numeric'});
+}
+function monthMatrix(ym){
+  const [y,m] = ym.split('-').map(Number);
+  const startWeekday = new Date(Date.UTC(y, m-1, 1, 12)).getUTCDay(); // 0=Sun..6=Sat
+  const daysInMonth = new Date(Date.UTC(y, m, 0, 12)).getUTCDate();
+  const cells = [];
+  for(let i=0;i<startWeekday;i++) cells.push(null);
+  for(let d=1; d<=daysInMonth; d++){
+    cells.push(new Date(Date.UTC(y, m-1, d, 12)).toISOString().slice(0,10));
+  }
+  while(cells.length % 7 !== 0) cells.push(null);
+  const weeks = [];
+  for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+  return weeks;
+}
+function arDateShort(dateStr){
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m-1, d, 12));
+  return dt.toLocaleDateString('ar', {timeZone:'UTC', weekday:'short', day:'numeric', month:'short'});
+}
+
 function seededPick(seedStr, n){
   let h = 0;
   for(let i=0;i<seedStr.length;i++){ h = (h*31 + seedStr.charCodeAt(i)) >>> 0; }
@@ -382,6 +513,7 @@ async function boot(){
   }
   if(!STATE){ renderSetup(); return; }
   ensureGoals();
+  ensureEvents();
   loadDay();
   render();
   scheduleMidnightRefresh();
@@ -392,6 +524,10 @@ function ensureGoals(){
   if(!STATE.goals) STATE.goals = {me:[], her:[]};
   if(!Array.isArray(STATE.goals.me)) STATE.goals.me = [];
   if(!Array.isArray(STATE.goals.her)) STATE.goals.her = [];
+}
+
+function ensureEvents(){
+  if(!Array.isArray(STATE.events)) STATE.events = [];
 }
 
 function scheduleMidnightRefresh(){
@@ -415,6 +551,7 @@ function schedulePolling(){
       if(fresh && JSON.stringify(fresh) !== JSON.stringify(STATE)){
         STATE = fresh;
         ensureGoals();
+        ensureEvents();
         loadDay();
         render();
       }
@@ -492,7 +629,8 @@ function renderSetup(){
       names:{me, her},
       tasks: DEFAULT_TASKS.map(t => ({id:uid(), label:t})),
       days:{},
-      goals:{me:[], her:[]}
+      goals:{me:[], her:[]},
+      events:[]
     };
     try{
       await saveStateToServer(newState);
@@ -659,6 +797,225 @@ function attachGoalsEvents(){
   });
 }
 
+/* ---------------- calendar / events ---------------- */
+const REPEAT_STEP = { weekly:7, biweekly:14 };
+const REPEAT_LABEL = { weekly:'↻ يتكرر أسبوعيًا', biweekly:'↻ يتكرر كل أسبوعين' };
+
+function occursOn(e, dateKey){
+  if(dateKey < e.date) return false;
+  if(!e.repeat) return dateKey === e.date;
+  const step = REPEAT_STEP[e.repeat];
+  return step ? (daysBetween(e.date, dateKey) % step === 0) : (dateKey === e.date);
+}
+// first occurrence of e on or after fromKey (fromKey itself included)
+function nextOccurrenceFrom(e, fromKey){
+  if(e.date >= fromKey) return e.date;
+  if(!e.repeat) return e.date; // one-off, already in the past
+  const step = REPEAT_STEP[e.repeat];
+  const diff = daysBetween(e.date, fromKey);
+  const rem = diff % step;
+  return rem === 0 ? fromKey : shiftDateKey(fromKey, step - rem);
+}
+function eventsOnDate(dateKey){
+  ensureEvents();
+  return STATE.events.filter(e => occursOn(e, dateKey));
+}
+// one row per defined event (not expanded per-occurrence), for the list view
+function listEvents(){
+  ensureEvents();
+  return STATE.events
+    .map(e => ({...e, displayDate: nextOccurrenceFrom(e, today)}))
+    .sort((a,b) => a.displayDate.localeCompare(b.displayDate) || a.title.localeCompare(b.title));
+}
+function nextUpcomingEvent(){
+  const upcoming = listEvents().filter(e => e.displayDate >= today);
+  return upcoming[0] || null;
+}
+function addEvent(date, title, note, person, repeat){
+  mutate(()=>{
+    ensureEvents();
+    STATE.events.push({id:uid(), date, title, note: note||'', person: person||null, repeat: repeat||null});
+  });
+}
+function deleteEvent(id){
+  mutate(()=>{
+    ensureEvents();
+    STATE.events = STATE.events.filter(e => e.id!==id);
+  });
+}
+
+function renderCalAddRow(dateKey){
+  const names = STATE.names;
+  return `
+    <div class="cal-add-card">
+      <div class="add-row cal-add-row">
+        <input type="text" placeholder="عنوان الموعد…" data-caltitle>
+        <select data-calperson>
+          <option value="">مشترك</option>
+          <option value="me">${escapeHtml(names.me)}</option>
+          <option value="her">${escapeHtml(names.her)}</option>
+        </select>
+        <input type="date" value="${dateKey||''}" data-caldateinput>
+        <select data-calrepeat>
+          <option value="">لا يتكرر</option>
+          <option value="weekly">أسبوعيًا</option>
+          <option value="biweekly">كل أسبوعين</option>
+        </select>
+        <input type="text" placeholder="ملاحظة (اختياري)" data-calnote>
+        <button data-caladdbtn>إضافة</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCalEventItem(e, listStyle){
+  const personCls = e.person === 'me' ? 'cal-event-me' : e.person === 'her' ? 'cal-event-her' : 'cal-event-shared';
+  const showDate = listStyle ? e.displayDate : null;
+  const cls = listStyle ? `cal-list-item ${personCls} ${showDate<today?'cal-past':''}` : `cal-event-item ${personCls}`;
+  const dateBit = listStyle ? `<div class="cal-list-date">${arDateShort(showDate)}</div>` : '';
+  const who = e.person ? escapeHtml(STATE.names[e.person]) : 'مشترك';
+  return `
+    <li class="${cls}">
+      ${dateBit}
+      <div class="cal-event-main">
+        <div class="cal-event-title">${escapeHtml(e.title)}</div>
+        ${e.note ? `<div class="cal-event-note">${escapeHtml(e.note)}</div>` : ''}
+        <div class="cal-event-who">${who}${e.repeat ? ` · ${REPEAT_LABEL[e.repeat]}` : ''}</div>
+      </div>
+      <button class="cal-del" data-caldel="${e.id}" aria-label="حذف">×</button>
+    </li>`;
+}
+
+function renderCalDayDetail(){
+  const dateKey = calSelectedDate || today;
+  const dayEvents = eventsOnDate(dateKey);
+  const rows = dayEvents.length
+    ? dayEvents.map(e => renderCalEventItem(e, false)).join('')
+    : '<li class="empty-tasks">لا توجد مواعيد في هذا اليوم</li>';
+
+  return `
+    <div class="cal-day-detail">
+      <h3>${arDate(dateKey)}</h3>
+      <ul class="cal-event-list">${rows}</ul>
+      ${renderCalAddRow(dateKey)}
+    </div>
+  `;
+}
+
+function renderCalendarGrid(){
+  if(!calMonth) calMonth = today.slice(0,7);
+  const weeks = monthMatrix(calMonth);
+  const headerCells = WEEKDAYS_AR.map(w => `<div class="cal-weekday">${w}</div>`).join('');
+  const bodyCells = weeks.map(week => week.map(dateKey => {
+    if(!dateKey) return `<div class="cal-cell cal-cell-pad"></div>`;
+    const dayEvents = eventsOnDate(dateKey);
+    const dayNum = Number(dateKey.slice(8,10));
+    const isToday = dateKey === today;
+    const isSelected = dateKey === calSelectedDate;
+    const pillCls = e => e.person === 'me' ? 'cal-pill-me' : e.person === 'her' ? 'cal-pill-her' : 'cal-pill-shared';
+    const pills = dayEvents.slice(0,3).map(e => `<div class="cal-pill ${pillCls(e)}">${escapeHtml(e.title)}</div>`).join('');
+    const more = dayEvents.length > 3 ? `<div class="cal-more">+${toAr(dayEvents.length-3)}</div>` : '';
+    return `<button class="cal-cell ${isToday?'is-today':''} ${isSelected?'is-selected':''} ${dayEvents.length?'has-events':''}" data-calpick="${dateKey}">
+      <span class="cal-daynum">${toAr(dayNum)}</span>
+      <div class="cal-events">${pills}${more}</div>
+    </button>`;
+  }).join('')).join('');
+
+  return `
+    <div class="cal-nav">
+      <button class="cal-navbtn" data-calprev aria-label="الشهر السابق">‹</button>
+      <div class="cal-monthlabel">${monthLabel(calMonth)}</div>
+      <button class="cal-navbtn" data-calnext aria-label="الشهر التالي">›</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-weekdays">${headerCells}</div>
+      <div class="cal-days">${bodyCells}</div>
+    </div>
+    ${renderCalDayDetail()}
+  `;
+}
+
+function renderCalendarList(){
+  const all = listEvents();
+  const rows = all.length
+    ? all.map(e => renderCalEventItem(e, true)).join('')
+    : '<li class="empty-tasks">لا توجد مواعيد بعد، أضيفا واحدًا أدناه</li>';
+
+  return `
+    <ul class="cal-list">${rows}</ul>
+    ${renderCalAddRow(today)}
+  `;
+}
+
+function renderCalendarSection(){
+  ensureEvents();
+  const nextEvent = nextUpcomingEvent();
+  return `
+    <div class="minimum">
+      <div class="label">أقرب موعد قادم</div>
+      ${nextEvent ? `
+        <div class="task">${escapeHtml(nextEvent.title)}</div>
+        <div class="sub">${arDate(nextEvent.displayDate)} — ${nextEvent.person ? escapeHtml(STATE.names[nextEvent.person]) : 'مشترك'}</div>
+      ` : `
+        <div class="task">لا توجد مواعيد قادمة</div>
+        <div class="sub">أضيفا اختبارًا أو موعد تسليم أدناه لتذكيركما به</div>
+      `}
+    </div>
+
+    <div class="cal-toggle">
+      <button class="cal-toggle-btn ${calView==='grid'?'active':''}" data-calview="grid">شهري</button>
+      <button class="cal-toggle-btn ${calView==='list'?'active':''}" data-calview="list">قائمة</button>
+    </div>
+
+    ${calView==='grid' ? renderCalendarGrid() : renderCalendarList()}
+  `;
+}
+
+function attachCalendarEvents(){
+  $app.querySelectorAll('[data-calview]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const v = b.dataset.calview;
+      if(calView===v) return;
+      calView = v;
+      render();
+    });
+  });
+  $app.querySelectorAll('[data-calprev]').forEach(b=>{
+    b.addEventListener('click', ()=>{ calMonth = shiftMonth(calMonth, -1); render(); });
+  });
+  $app.querySelectorAll('[data-calnext]').forEach(b=>{
+    b.addEventListener('click', ()=>{ calMonth = shiftMonth(calMonth, 1); render(); });
+  });
+  $app.querySelectorAll('[data-calpick]').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      calSelectedDate = cell.dataset.calpick;
+      render();
+    });
+  });
+  $app.querySelectorAll('[data-caldel]').forEach(b=>{
+    b.addEventListener('click', ()=> deleteEvent(b.dataset.caldel));
+  });
+
+  const titleInput = $app.querySelector('[data-caltitle]');
+  const personSelect = $app.querySelector('[data-calperson]');
+  const dateInput = $app.querySelector('[data-caldateinput]');
+  const repeatSelect = $app.querySelector('[data-calrepeat]');
+  const noteInput = $app.querySelector('[data-calnote]');
+  const btn = $app.querySelector('[data-caladdbtn]');
+  if(titleInput && dateInput && btn){
+    const submit = ()=>{
+      const title = titleInput.value.trim();
+      const date = dateInput.value;
+      const note = noteInput.value.trim();
+      if(!title || !date) return;
+      addEvent(date, title, note, personSelect.value || null, repeatSelect.value || null);
+    };
+    btn.addEventListener('click', submit);
+    titleInput.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+    noteInput.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  }
+}
+
 function minimumTask(){
   if(dayState.minimumId==null) return null;
   return STATE.tasks.find(t=>t.id===dayState.minimumId) || STATE.tasks[0] || null;
@@ -738,12 +1095,15 @@ function render(){
     <div class="view-tabs">
       <button class="view-tab ${view==='daily'?'active':''}" data-view="daily">الورد اليومي</button>
       <button class="view-tab ${view==='goals'?'active':''}" data-view="goals">الأهداف</button>
+      <button class="view-tab ${view==='calendar'?'active':''}" data-view="calendar">التقويم</button>
     </div>
 
-    ${view==='daily' ? renderDailySection(min, names) : renderGoalsSection(names)}
+    ${view==='daily' ? renderDailySection(min, names) : view==='goals' ? renderGoalsSection(names) : renderCalendarSection()}
   `;
   attachViewTabs();
-  if(view==='daily'){ attachDailyEvents(); } else { attachGoalsEvents(); }
+  if(view==='daily'){ attachDailyEvents(); }
+  else if(view==='goals'){ attachGoalsEvents(); }
+  else { attachCalendarEvents(); }
 }
 
 function attachViewTabs(){
