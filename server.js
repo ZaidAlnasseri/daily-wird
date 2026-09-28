@@ -70,6 +70,64 @@ async function writeState(state) {
 // ---- API ----
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
+// ---- helpers shared with the client's own logic (public/index.html) ----
+const UAE_TZ = 'Asia/Dubai';
+
+// Must stay in sync with DAY_ROLLOVER_HOUR in public/index.html — the "wird
+// day" rolls over at 3am Dubai time, not midnight.
+const DAY_ROLLOVER_HOUR = 3;
+
+function todayKeyServer() {
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: UAE_TZ, year: 'numeric', month: '2-digit', day: '2-digit'
+  });
+  const rolledNow = new Date(Date.now() - DAY_ROLLOVER_HOUR * 60 * 60 * 1000);
+  return fmt.format(rolledNow);
+}
+
+// Must stay byte-for-byte identical to seededPick() in public/index.html so
+// the widget/shortcut and the web app always agree on "today's minimum".
+function seededPick(seedStr, n) {
+  let h = 0;
+  for (let i = 0; i < seedStr.length; i++) { h = (h * 31 + seedStr.charCodeAt(i)) >>> 0; }
+  return h % n;
+}
+
+// Lightweight, read-only endpoint for the iOS Shortcuts home-screen widget:
+// today's minimum wird + whether each of you has checked it off yet.
+app.get('/api/minimum', async (req, res) => {
+  try {
+    const state = await readState();
+    if (!state || !Array.isArray(state.tasks) || !state.tasks.length) {
+      return res.json({ ok: true, ready: false, message: 'لم يتم إعداد التطبيق بعد' });
+    }
+    const today = todayKeyServer();
+    const day = (state.days && state.days[today]) || null;
+    const minimumId = (day && day.minimumId != null)
+      ? day.minimumId
+      : state.tasks[seededPick(today, state.tasks.length)].id;
+    const task = state.tasks.find(t => t.id === minimumId) || state.tasks[0];
+    const names = state.names || {};
+    const meDone = !!(day && day.me && day.me.checked && day.me.checked[minimumId]);
+    const herDone = !!(day && day.her && day.her.checked && day.her.checked[minimumId]);
+
+    res.json({
+      ok: true,
+      ready: true,
+      date: today,
+      task: task ? task.label : '',
+      meName: names.me || '',
+      herName: names.her || '',
+      meDone,
+      herDone,
+      bothDone: meDone && herDone
+    });
+  } catch (err) {
+    console.error('[wird] minimum failed', err);
+    res.status(500).json({ ok: false, error: 'minimum_failed' });
+  }
+});
+
 app.get('/api/state', async (req, res) => {
   try {
     const state = await readState();
