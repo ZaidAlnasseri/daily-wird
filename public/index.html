@@ -949,17 +949,10 @@ function renderCalendarList(){
 
 function renderCalendarSection(){
   ensureEvents();
-  const nextEvent = nextUpcomingEvent();
   return `
     <div class="minimum">
-      <div class="label">أقرب موعد قادم</div>
-      ${nextEvent ? `
-        <div class="task">${escapeHtml(nextEvent.title)}</div>
-        <div class="sub">${arDate(nextEvent.displayDate)} — ${nextEvent.person ? escapeHtml(STATE.names[nextEvent.person]) : 'مشترك'}</div>
-      ` : `
-        <div class="task">لا توجد مواعيد قادمة</div>
-        <div class="sub">أضيفا اختبارًا أو موعد تسليم أدناه لتذكيركما به</div>
-      `}
+      <div class="label">تذكير</div>
+      <div class="task">اليوم نعمة من الله، فاشكراه واستغلّاه بحكمة</div>
     </div>
 
     <div class="cal-toggle">
